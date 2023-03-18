@@ -9,6 +9,9 @@ import {
   SETUP_USER_ERROR,
   TOGGLE_SIDEBAR,
   LOGOUT_USER,
+  UPDATE_USER_BEGIN,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_ERROR,
 } from "../constants";
 import appReducer from "../helpers/app-reducer";
 
@@ -31,6 +34,33 @@ const AppContext = React.createContext();
 const useAppContext = () => React.useContext(AppContext);
 const AppProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer(appReducer, initialState);
+
+  const authFetch = axios.create({
+    baseURL: "/api/v1",
+  });
+
+  authFetch.interceptors.request.use(
+    (config) => {
+      config.headers["Authorization"] = `Bearer ${state.token}`;
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  authFetch.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      if (error.response.status === 401) {
+        logoutUser();
+      }
+
+      return Promise.reject(error);
+    }
+  );
 
   const clearAlert = () => {
     setTimeout(() => {
@@ -78,9 +108,41 @@ const AppProvider = ({ children }) => {
     removeFromLocalStorage();
   };
 
+  const updateUser = async (currentUser) => {
+    dispatch({ type: UPDATE_USER_BEGIN });
+
+    try {
+      const { data } = await authFetch.patch("/user/updateUser", currentUser);
+      const { user, token, location } = data;
+
+      addToLocalStorage({ user, token, location });
+
+      dispatch({
+        type: UPDATE_USER_SUCCESS,
+        payload: { user, token, location },
+      });
+    } catch (error) {
+      if (error.response.satus !== 401) {
+        dispatch({
+          type: UPDATE_USER_ERROR,
+          payload: { message: error.response.data.message },
+        });
+      }
+    }
+
+    clearAlert();
+  };
+
   return (
     <AppContext.Provider
-      value={{ ...state, nullValueAlert, setupUser, toggleSidebar, logoutUser }}
+      value={{
+        ...state,
+        nullValueAlert,
+        setupUser,
+        toggleSidebar,
+        logoutUser,
+        updateUser,
+      }}
     >
       {children}
     </AppContext.Provider>
