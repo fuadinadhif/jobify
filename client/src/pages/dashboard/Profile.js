@@ -6,7 +6,7 @@ import FormRow from "../../components/FormRow";
 import Alert from "../../components/Alert";
 
 function Profile() {
-  const { user, showAlert, isLoading, updateUser, nullValueAlert } =
+  const { user, showAlert, isLoading, updateUser, displayNullAlert } =
     useAppContext();
 
   const [name, setName] = React.useState(user?.name);
@@ -17,7 +17,7 @@ function Profile() {
     e.preventDefault();
 
     if (!name || !email || !location) {
-      nullValueAlert();
+      displayNullAlert();
     }
 
     updateUser({ name, email, location });

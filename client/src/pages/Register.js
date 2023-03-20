@@ -15,7 +15,7 @@ const initialAuthData = {
 };
 
 function Register() {
-  const { nullValueAlert, showAlert, isLoading, user, setupUser } =
+  const { displayNullAlert, showAlert, isLoading, user, setupUser } =
     useAppContext();
   const [authData, setAuthData] = React.useState(initialAuthData);
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ function Register() {
     const { name, email, password, isMember } = authData;
 
     if (!email || !password || (!isMember && !name)) {
-      nullValueAlert();
+      displayNullAlert();
       return;
     }
 

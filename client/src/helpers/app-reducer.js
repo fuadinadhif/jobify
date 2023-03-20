@@ -4,15 +4,24 @@ import {
   SETUP_USER_BEGIN,
   SETUP_USER_SUCCESS,
   SETUP_USER_ERROR,
-  TOGGLE_SIDEBAR,
-  LOGOUT_USER,
   UPDATE_USER_BEGIN,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_ERROR,
+  CREATE_JOB_BEGIN,
+  CREATE_JOB_SUCCESS,
+  CREATE_JOB_ERROR,
+  LOGOUT_USER,
+  TOGGLE_SIDEBAR,
+  HANDLE_INPUT_CHANGE,
+  CLEAR_INPUT_VALUES,
 } from "../constants";
 import { initialState } from "../hooks/use-app-context";
 
 const appReducer = (state, action) => {
+  if (action.type === CLEAR_ALERT) {
+    return { ...state, showAlert: false, alertType: "", alertText: "" };
+  }
+
   if (action.type === NULL_VALUE_ALERT) {
     return {
       ...state,
@@ -20,10 +29,6 @@ const appReducer = (state, action) => {
       alertType: "danger",
       alertText: "Please provide all values",
     };
-  }
-
-  if (action.type === CLEAR_ALERT) {
-    return { ...state, showAlert: false, alertType: "", alertText: "" };
   }
 
   if (action.type === SETUP_USER_BEGIN) {
@@ -54,20 +59,6 @@ const appReducer = (state, action) => {
     };
   }
 
-  if (action.type === TOGGLE_SIDEBAR) {
-    return { ...state, showSidebar: !state.showSidebar };
-  }
-
-  if (action.type === LOGOUT_USER) {
-    return {
-      ...initialState,
-      user: null,
-      token: null,
-      userLocation: "",
-      jobLocation: "",
-    };
-  }
-
   if (action.type === UPDATE_USER_BEGIN) {
     return { ...state, isLoading: true };
   }
@@ -94,6 +85,62 @@ const appReducer = (state, action) => {
       alertType: "danger",
       alertText: action.payload.message,
     };
+  }
+
+  if (action.type === CREATE_JOB_BEGIN) {
+    return { ...state, isLoading: true };
+  }
+
+  if (action.type === CREATE_JOB_SUCCESS) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: "success",
+      alertText: "Added new job",
+    };
+  }
+
+  if (action.type === CREATE_JOB_ERROR) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: "danger",
+      alertText: action.payload.message,
+    };
+  }
+
+  if (action.type === LOGOUT_USER) {
+    return {
+      ...initialState,
+      user: null,
+      token: null,
+      userLocation: "",
+      jobLocation: "",
+    };
+  }
+
+  if (action.type === TOGGLE_SIDEBAR) {
+    return { ...state, showSidebar: !state.showSidebar };
+  }
+
+  if (action.type === HANDLE_INPUT_CHANGE) {
+    return { ...state, [action.payload.name]: action.payload.value };
+  }
+
+  if (action.type === CLEAR_INPUT_VALUES) {
+    const initialState = {
+      isEditing: false,
+      editJobId: "",
+      position: "",
+      company: "",
+      jobLocation: state.userLocation,
+      jobType: "full-time",
+      status: "pending",
+    };
+
+    return { ...state, ...initialState };
   }
 };
 
