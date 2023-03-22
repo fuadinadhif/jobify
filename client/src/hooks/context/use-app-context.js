@@ -14,11 +14,20 @@ import {
   CREATE_JOB_BEGIN,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_ERROR,
+  GET_ALL_JOBS_BEGIN,
+  GET_ALL_JOBS_SUCCESS,
   TOGGLE_SIDEBAR,
   HANDLE_INPUT_CHANGE,
   CLEAR_INPUT_VALUES,
-} from "../constants";
-import appReducer from "../helpers/app-reducer";
+  DELETE_JOB_BEGIN,
+  SET_EDIT_JOB,
+  EDIT_JOB_BEGIN,
+  EDIT_JOB_SUCCESS,
+  EDIT_JOB_ERROR,
+} from "../../constants";
+import appReducer from "./app-reducer";
+
+const AppContext = React.createContext();
 
 const user = localStorage.getItem("user");
 const token = localStorage.getItem("token");
@@ -41,11 +50,11 @@ const initialState = {
   jobType: "full-time",
   statusOptions: ["pending", "interview", "accepted", "declined"],
   status: "pending",
+  jobs: [],
+  totalJobs: 0,
+  numOfPages: 1,
+  page: 1,
 };
-
-const AppContext = React.createContext();
-
-const useAppContext = () => React.useContext(AppContext);
 
 const AppProvider = ({ children }) => {
   const [state, dispatch] = React.useReducer(appReducer, initialState);
@@ -123,7 +132,7 @@ const AppProvider = ({ children }) => {
     dispatch({ type: UPDATE_USER_BEGIN });
 
     try {
-      const { data } = await authFetch.patch("/user/updateUser", currentUser);
+      const { data } = await authFetch.patch("/users/updateUser", currentUser);
       const { user, token, location } = data;
 
       addToLocalStorage({ user, token, location });
@@ -157,7 +166,7 @@ const AppProvider = ({ children }) => {
     try {
       const { position, company, jobLocation, jobType, status } = state;
 
-      await authFetch.post("/job", {
+      await authFetch.post("/jobs", {
         company,
         position,
         jobLocation,
@@ -174,6 +183,67 @@ const AppProvider = ({ children }) => {
         type: CREATE_JOB_ERROR,
         payload: { message: error.response.data.message },
       });
+    }
+
+    clearAlert();
+  };
+
+  const getAllJobs = async () => {
+    dispatch({ type: GET_ALL_JOBS_BEGIN });
+
+    try {
+      const { data } = await authFetch.get("/jobs");
+      const { jobs, totalJobs, numOfPages } = data;
+
+      dispatch({
+        type: GET_ALL_JOBS_SUCCESS,
+        payload: { jobs, totalJobs, numOfPages },
+      });
+    } catch (error) {
+      logoutUser();
+    }
+  };
+
+  const setEditJob = (id) => {
+    dispatch({ type: SET_EDIT_JOB, payload: { id } });
+  };
+
+  const editJob = async () => {
+    dispatch({ type: EDIT_JOB_BEGIN });
+
+    try {
+      const { position, company, jobLocation, jobType, status } = state;
+
+      await authFetch.patch(`/jobs/${state.editJobId}`, {
+        position,
+        company,
+        jobLocation,
+        jobType,
+        status,
+      });
+
+      dispatch({ type: EDIT_JOB_SUCCESS });
+      dispatch({ type: CLEAR_INPUT_VALUES });
+    } catch (error) {
+      if (error.response.status === 401) return;
+
+      dispatch({
+        type: EDIT_JOB_ERROR,
+        payload: { message: error.response.data.message },
+      });
+    }
+
+    clearAlert();
+  };
+
+  const deleteJob = async (id) => {
+    dispatch({ type: DELETE_JOB_BEGIN });
+
+    try {
+      await authFetch.delete(`/jobs/${id}`);
+      getAllJobs();
+    } catch (error) {
+      logoutUser();
     }
   };
   // End of job functions
@@ -199,6 +269,10 @@ const AppProvider = ({ children }) => {
         updateUser,
         logoutUser,
         createJob,
+        getAllJobs,
+        setEditJob,
+        editJob,
+        deleteJob,
         toggleSidebar,
         handleInputChange,
         clearInputValues,
@@ -219,6 +293,10 @@ function removeFromLocalStorage() {
   localStorage.removeItem("user");
   localStorage.removeItem("token");
   localStorage.removeItem("location");
+}
+
+function useAppContext() {
+  return React.useContext(AppContext);
 }
 
 export { AppProvider, useAppContext, initialState };

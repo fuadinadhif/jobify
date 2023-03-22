@@ -12,8 +12,9 @@ import errorMiddleware from "./middlewares/error-mdw.js";
 import authMiddleware from "./middlewares/auth-mdw.js";
 // routes
 import authRouter from "./routes/auth-route.js";
-import jobRouter from "./routes/job-route.js";
-import userRouter from "./routes/user-router.js";
+import jobRouter from "./routes/jobs-route.js";
+import populateRouter from "./routes/populate-route.js";
+import userRouter from "./routes/users-router.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -39,8 +40,9 @@ app.get("/api/v1", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/job", authMiddleware, jobRouter);
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1/jobs", authMiddleware, jobRouter);
+app.use("/api/v1/populate", populateRouter);
+app.use("/api/v1/users", userRouter);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 

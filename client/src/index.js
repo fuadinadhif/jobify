@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 
 import "normalize.css";
 import "./index.css";
-import { AppProvider } from "./hooks/use-app-context";
+import { AppProvider } from "./hooks/context/use-app-context";
 import App from "./App";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

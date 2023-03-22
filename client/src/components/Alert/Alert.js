@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useAppContext } from "../../hooks/use-app-context";
+import { useAppContext } from "../../hooks/context/use-app-context";
 
 function Alert() {
   const { alertType, alertText } = useAppContext();

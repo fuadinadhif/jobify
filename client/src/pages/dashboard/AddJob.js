@@ -1,6 +1,6 @@
 import styled from "styled-components/macro";
 
-import { useAppContext } from "../../hooks/use-app-context.js";
+import { useAppContext } from "../../hooks/context/use-app-context.js";
 import FormRow from "../../components/FormRow";
 import FormRowSelect from "../../components/FormRowSelect";
 import Alert from "../../components/Alert";
@@ -20,6 +20,7 @@ function AddJob() {
     handleInputChange,
     clearInputValues,
     createJob,
+    editJob,
   } = useAppContext();
 
   const handleSubmit = (e) => {
@@ -31,6 +32,7 @@ function AddJob() {
     }
 
     if (isEditing) {
+      editJob();
       return;
     }
 

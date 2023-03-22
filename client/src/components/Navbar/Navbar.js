@@ -3,7 +3,7 @@ import styled from "styled-components/macro";
 import { FaAlignLeft, FaUserCircle, FaCaretDown } from "react-icons/fa";
 
 import Logo from "../../components/Logo";
-import { useAppContext } from "../../hooks/use-app-context";
+import { useAppContext } from "../../hooks/context/use-app-context";
 
 function Navbar() {
   const { user, logoutUser, toggleSidebar } = useAppContext();

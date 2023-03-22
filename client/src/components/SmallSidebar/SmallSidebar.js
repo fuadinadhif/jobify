@@ -2,7 +2,7 @@ import React from "react";
 import { FaTimes } from "react-icons/fa";
 import styled from "styled-components/macro";
 
-import { useAppContext } from "../../hooks/use-app-context";
+import { useAppContext } from "../../hooks/context/use-app-context";
 import Logo from "../Logo";
 import NavLinks from "../NavLinks/";
 

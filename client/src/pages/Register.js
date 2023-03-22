@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components/macro";
 import { useNavigate } from "react-router-dom";
 
-import { useAppContext } from "../hooks/use-app-context";
+import { useAppContext } from "../hooks/context/use-app-context";
 import Logo from "../components/Logo";
 import FormRow from "../components/FormRow";
 import Alert from "../components/Alert/";
