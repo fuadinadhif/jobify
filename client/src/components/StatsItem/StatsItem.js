@@ -1,4 +1,17 @@
-import styled from 'styled-components'
+import React from "react";
+import styled from "styled-components/macro";
+
+function StatsItem({ count, title, icon, color, bcg }) {
+  return (
+    <Wrapper color={color} bcg={bcg}>
+      <header>
+        <span className="count">{count}</span>
+        <div className="icon">{icon}</div>
+      </header>
+      <h5 className="title">{title}</h5>
+    </Wrapper>
+  );
+}
 
 const Wrapper = styled.article`
   padding: 2rem;
@@ -36,6 +49,6 @@ const Wrapper = styled.article`
       color: ${(props) => props.color};
     }
   }
-`
+`;
 
-export default Wrapper
+export default StatsItem;

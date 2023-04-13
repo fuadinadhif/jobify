@@ -92,6 +92,23 @@ function Register() {
         <button type="submit" className="btn btn-block">
           Submit
         </button>
+        <button
+          type="submit"
+          className="btn btn-block btn-hipster"
+          disabled={isLoading}
+          onClick={() => {
+            setupUser({
+              currentUser: {
+                email: "demo.user@gmail.com",
+                password: "demouser",
+              },
+              endPoint: "login",
+              alertText: "Login successful. Please wait...",
+            });
+          }}
+        >
+          {isLoading ? "Loading..." : "Demo Application"}
+        </button>
         <p>
           {authData.isMember ? "Not a member yet?" : "Already a member?"}{" "}
           <button

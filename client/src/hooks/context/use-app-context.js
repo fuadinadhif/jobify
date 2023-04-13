@@ -2,8 +2,8 @@ import React from "react";
 import axios from "axios";
 
 import {
-  CLEAR_ALERT,
   NULL_VALUE_ALERT,
+  CLEAR_ALERT,
   SETUP_USER_BEGIN,
   SETUP_USER_SUCCESS,
   SETUP_USER_ERROR,
@@ -16,14 +16,17 @@ import {
   CREATE_JOB_ERROR,
   GET_ALL_JOBS_BEGIN,
   GET_ALL_JOBS_SUCCESS,
-  TOGGLE_SIDEBAR,
-  HANDLE_INPUT_CHANGE,
-  CLEAR_INPUT_VALUES,
-  DELETE_JOB_BEGIN,
   SET_EDIT_JOB,
   EDIT_JOB_BEGIN,
   EDIT_JOB_SUCCESS,
   EDIT_JOB_ERROR,
+  DELETE_JOB_BEGIN,
+  GET_JOB_STATS_BEGIN,
+  GET_JOB_STATS_SUCCESS,
+  TOGGLE_SIDEBAR,
+  HANDLE_INPUT_CHANGE,
+  CLEAR_INPUT_VALUES,
+  CHANGE_PAGE,
 } from "../../constants";
 import appReducer from "./app-reducer";
 
@@ -39,21 +42,28 @@ const initialState = {
   showSidebar: false,
   alertType: "",
   alertText: "",
-  user: user ? JSON.parse(user) : null,
   token: token || null,
+  user: user ? JSON.parse(user) : null,
   userLocation: location || "",
-  jobLocation: location || "",
-  editJobId: "",
   position: "",
   company: "",
+  jobLocation: location || "",
   jobTypeOptions: ["full-time", "part-time", "internship"],
   jobType: "full-time",
   statusOptions: ["pending", "interview", "accepted", "declined"],
   status: "pending",
+  editJobId: "",
   jobs: [],
   totalJobs: 0,
   numOfPages: 1,
   page: 1,
+  stats: {},
+  monthlyApplications: [],
+  search: "",
+  searchStatus: "all",
+  searchType: "all",
+  sort: "latest",
+  sortOptions: ["latest", "oldest", "a-z", "z-a"],
 };
 
 const AppProvider = ({ children }) => {
@@ -189,15 +199,38 @@ const AppProvider = ({ children }) => {
   };
 
   const getAllJobs = async () => {
+    const { page, search, searchStatus, searchType, sort } = state;
+    let url = `/jobs?page=${page}&status=${searchStatus}&jobType=${searchType}&sort=${sort}`;
+
+    if (search) url = url + `&search=${search}`;
+
     dispatch({ type: GET_ALL_JOBS_BEGIN });
 
     try {
-      const { data } = await authFetch.get("/jobs");
+      const { data } = await authFetch.get(url);
       const { jobs, totalJobs, numOfPages } = data;
 
       dispatch({
         type: GET_ALL_JOBS_SUCCESS,
         payload: { jobs, totalJobs, numOfPages },
+      });
+    } catch (error) {
+      logoutUser();
+    }
+  };
+
+  const getJobStats = async () => {
+    dispatch({ type: GET_JOB_STATS_BEGIN });
+
+    try {
+      const { data } = await authFetch.get("/jobs/job-stats");
+
+      dispatch({
+        type: GET_JOB_STATS_SUCCESS,
+        payload: {
+          stats: data.stats,
+          monthlyApplications: data.monthlyApplications,
+        },
       });
     } catch (error) {
       logoutUser();
@@ -260,6 +293,10 @@ const AppProvider = ({ children }) => {
     dispatch({ type: CLEAR_INPUT_VALUES });
   };
 
+  const changePage = (page) => {
+    dispatch({ type: CHANGE_PAGE, payload: { page } });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -270,12 +307,14 @@ const AppProvider = ({ children }) => {
         logoutUser,
         createJob,
         getAllJobs,
+        getJobStats,
         setEditJob,
         editJob,
         deleteJob,
         toggleSidebar,
         handleInputChange,
         clearInputValues,
+        changePage,
       }}
     >
       {children}

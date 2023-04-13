@@ -13,6 +13,8 @@ import {
   CREATE_JOB_ERROR,
   GET_ALL_JOBS_BEGIN,
   GET_ALL_JOBS_SUCCESS,
+  GET_JOB_STATS_BEGIN,
+  GET_JOB_STATS_SUCCESS,
   SET_EDIT_JOB,
   EDIT_JOB_BEGIN,
   EDIT_JOB_SUCCESS,
@@ -21,6 +23,7 @@ import {
   TOGGLE_SIDEBAR,
   HANDLE_INPUT_CHANGE,
   CLEAR_INPUT_VALUES,
+  CHANGE_PAGE,
 } from "../../constants";
 import { initialState } from "./use-app-context";
 
@@ -158,6 +161,19 @@ const appReducer = (state, action) => {
     };
   }
 
+  if (action.type === GET_JOB_STATS_BEGIN) {
+    return { ...state, isLoading: true };
+  }
+
+  if (action.type === GET_JOB_STATS_SUCCESS) {
+    return {
+      ...state,
+      isLoading: false,
+      stats: action.payload.stats,
+      monthlyApplications: action.payload.monthlyApplications,
+    };
+  }
+
   if (action.type === EDIT_JOB_BEGIN) {
     return { ...state, isLoading: true };
   }
@@ -191,7 +207,7 @@ const appReducer = (state, action) => {
   }
 
   if (action.type === HANDLE_INPUT_CHANGE) {
-    return { ...state, [action.payload.name]: action.payload.value };
+    return { ...state, page: 1, [action.payload.name]: action.payload.value };
   }
 
   if (action.type === CLEAR_INPUT_VALUES) {
@@ -203,9 +219,17 @@ const appReducer = (state, action) => {
       jobLocation: state.userLocation,
       jobType: "full-time",
       status: "pending",
+      search: "",
+      searchStatus: "all",
+      searchType: "all",
+      sort: "latest",
     };
 
     return { ...state, ...initialState };
+  }
+
+  if (action.type === CHANGE_PAGE) {
+    return { ...state, page: action.payload.page };
   }
 };
 

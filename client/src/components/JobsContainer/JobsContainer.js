@@ -4,14 +4,27 @@ import styled from "styled-components/macro";
 import { useAppContext } from "../../hooks/context/use-app-context";
 import Loading from "../Loading";
 import Job from "../Job";
+import PageButtonContainer from "../PageButtonContainer";
 
 function JobsContainer() {
-  const { getAllJobs, jobs, isLoading, totalJobs } = useAppContext();
+  const {
+    getAllJobs,
+    jobs,
+    isLoading,
+    totalJobs,
+    search,
+    searchStatus,
+    searchType,
+    sort,
+    numOfPages,
+    page,
+  } = useAppContext();
 
   React.useEffect(() => {
-    getAllJobs();
+    const timeoutId = setTimeout(() => getAllJobs(), 500);
+    return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [page, search, searchStatus, searchType, sort]);
 
   if (isLoading) {
     return <Loading center="center" />;
@@ -33,6 +46,7 @@ function JobsContainer() {
             return <Job key={job._id} {...job} />;
           })}
         </div>
+        {numOfPages > 1 && <PageButtonContainer />}
       </Wrapper>
     );
   }

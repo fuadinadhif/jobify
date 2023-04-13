@@ -37,7 +37,7 @@ const Wrapper = styled.aside`
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: -1;
@@ -45,6 +45,7 @@ const Wrapper = styled.aside`
     transition: var(--transition);
   }
   .show-sidebar {
+    display: flex;
     z-index: 99;
     opacity: 1;
   }

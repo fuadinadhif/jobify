@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom";
+
 import { useAppContext } from "../hooks/context/use-app-context";
 
 function ProtectedRoute({ children }) {

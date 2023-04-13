@@ -1,8 +1,8 @@
+import React from "react";
 import styled from "styled-components/macro";
 import { Link } from "react-router-dom";
 
 import main from "../assets/images/main.svg";
-
 import Logo from "../components/Logo";
 
 function Landing() {
