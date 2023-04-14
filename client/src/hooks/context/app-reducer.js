@@ -24,6 +24,8 @@ import {
   HANDLE_INPUT_CHANGE,
   CLEAR_INPUT_VALUES,
   CHANGE_PAGE,
+  GET_LOGGED_IN_USER_BEGIN,
+  GET_LOGGED_IN_USER_SUCCESS,
 } from "../../constants";
 import { initialState } from "./use-app-context";
 
@@ -49,7 +51,6 @@ const appReducer = (state, action) => {
     return {
       ...state,
       user: action.payload.user,
-      token: action.payload.token,
       userLocation: action.payload.location,
       jobLocation: action.payload.location,
       isLoading: false,
@@ -69,6 +70,20 @@ const appReducer = (state, action) => {
     };
   }
 
+  if (action.type === GET_LOGGED_IN_USER_BEGIN) {
+    return { ...state, showAlert: false };
+  }
+
+  if (action.type === GET_LOGGED_IN_USER_SUCCESS) {
+    return {
+      ...state,
+      isUserLoading: false,
+      user: action.payload.user,
+      userLocation: action.payload.location,
+      jobLocation: action.payload.location,
+    };
+  }
+
   if (action.type === UPDATE_USER_BEGIN) {
     return { ...state, isLoading: true };
   }
@@ -77,7 +92,6 @@ const appReducer = (state, action) => {
     return {
       ...state,
       user: action.payload.user,
-      token: action.payload.token,
       userLocation: action.payload.location,
       jobLocation: action.payload.location,
       isLoading: false,
@@ -100,10 +114,7 @@ const appReducer = (state, action) => {
   if (action.type === LOGOUT_USER) {
     return {
       ...initialState,
-      user: null,
-      token: null,
-      userLocation: "",
-      jobLocation: "",
+      isUserLoading: false,
     };
   }
 

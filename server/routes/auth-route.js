@@ -1,7 +1,7 @@
 import express from "express";
 import rateLimiter from "express-rate-limit";
 
-import { register, login } from "../controllers/auth-controller.js";
+import { register, login, logout } from "../controllers/auth-controller.js";
 
 const apiLimiter = rateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -12,6 +12,7 @@ const apiLimiter = rateLimiter({
 const router = express.Router();
 
 router.route("/register").post(apiLimiter, register);
-router.route("/login").post(apiLimiter, login);
+router.route("/login").post(login);
+router.route("/logout").get(logout);
 
 export default router;

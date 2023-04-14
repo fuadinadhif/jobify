@@ -3,13 +3,9 @@ import jwt from "jsonwebtoken";
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies.token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer")) {
-      throw new UnauthenticatedError("Invalid authentication");
-    }
-
-    const token = authHeader.split(" ")[1];
+    if (!token) throw new UnauthenticatedError("Invalid authentication");
 
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET);

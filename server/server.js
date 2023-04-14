@@ -10,6 +10,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import xss from "xss-clean";
 import mongoSanitize from "express-mongo-sanitize";
+import cookieParser from "cookie-parser";
 // database
 import connectDB from "./db/connectDB.js";
 // middlewares
@@ -28,6 +29,7 @@ app.use(helmet());
 app.use(xss());
 app.use(mongoSanitize());
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   express.static(
     path.resolve(dirname(fileURLToPath(import.meta.url)), "../client/build")

@@ -7,6 +7,8 @@ import {
   SETUP_USER_BEGIN,
   SETUP_USER_SUCCESS,
   SETUP_USER_ERROR,
+  GET_LOGGED_IN_USER_BEGIN,
+  GET_LOGGED_IN_USER_SUCCESS,
   UPDATE_USER_BEGIN,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_ERROR,
@@ -32,22 +34,19 @@ import appReducer from "./app-reducer";
 
 const AppContext = React.createContext();
 
-const user = localStorage.getItem("user");
-const token = localStorage.getItem("token");
-const location = localStorage.getItem("location");
 const initialState = {
   isEditing: false,
+  isUserLoading: true,
   isLoading: false,
   showAlert: false,
   showSidebar: false,
   alertType: "",
   alertText: "",
-  token: token || null,
-  user: user ? JSON.parse(user) : null,
-  userLocation: location || "",
+  user: null,
+  userLocation: "",
   position: "",
   company: "",
-  jobLocation: location || "",
+  jobLocation: "",
   jobTypeOptions: ["full-time", "part-time", "internship"],
   jobType: "full-time",
   statusOptions: ["pending", "interview", "accepted", "declined"],
@@ -73,16 +72,6 @@ const AppProvider = ({ children }) => {
   const authFetch = axios.create({
     baseURL: "/api/v1",
   });
-
-  authFetch.interceptors.request.use(
-    (config) => {
-      config.headers["Authorization"] = `Bearer ${state.token}`;
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
 
   authFetch.interceptors.response.use(
     (response) => {
@@ -120,13 +109,11 @@ const AppProvider = ({ children }) => {
         `/api/v1/auth/${endPoint}`,
         currentUser
       );
-      const { user, token, location } = await response.data;
-
-      addToLocalStorage({ user, token, location });
+      const { user, location } = await response.data;
 
       dispatch({
         type: SETUP_USER_SUCCESS,
-        payload: { user, token, location, alertText },
+        payload: { user, location, alertText },
       });
     } catch (error) {
       dispatch({
@@ -138,18 +125,33 @@ const AppProvider = ({ children }) => {
     clearAlert();
   };
 
+  const getLoggedInUser = async () => {
+    dispatch({ type: GET_LOGGED_IN_USER_BEGIN });
+
+    try {
+      const { data } = await authFetch.get("/users/getLoggedInUser");
+      const { user, location } = data;
+
+      dispatch({
+        type: GET_LOGGED_IN_USER_SUCCESS,
+        payload: { user, location },
+      });
+    } catch (error) {
+      if (error.response.status === 401) return;
+      logoutUser();
+    }
+  };
+
   const updateUser = async (currentUser) => {
     dispatch({ type: UPDATE_USER_BEGIN });
 
     try {
       const { data } = await authFetch.patch("/users/updateUser", currentUser);
-      const { user, token, location } = data;
-
-      addToLocalStorage({ user, token, location });
+      const { user, location } = data;
 
       dispatch({
         type: UPDATE_USER_SUCCESS,
-        payload: { user, token, location },
+        payload: { user, location },
       });
     } catch (error) {
       if (error.response.satus !== 401) {
@@ -163,9 +165,9 @@ const AppProvider = ({ children }) => {
     clearAlert();
   };
 
-  const logoutUser = () => {
+  const logoutUser = async () => {
+    await authFetch.get("/auth/logout");
     dispatch({ type: LOGOUT_USER });
-    removeFromLocalStorage();
   };
   // End of user functions
 
@@ -297,12 +299,18 @@ const AppProvider = ({ children }) => {
     dispatch({ type: CHANGE_PAGE, payload: { page } });
   };
 
+  React.useEffect(() => {
+    getLoggedInUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
         ...state,
         displayNullAlert,
         setupUser,
+        getLoggedInUser,
         updateUser,
         logoutUser,
         createJob,
@@ -321,18 +329,6 @@ const AppProvider = ({ children }) => {
     </AppContext.Provider>
   );
 };
-
-function addToLocalStorage({ user, token, location }) {
-  localStorage.setItem("user", JSON.stringify(user));
-  localStorage.setItem("token", token);
-  localStorage.setItem("location", location);
-}
-
-function removeFromLocalStorage() {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  localStorage.removeItem("location");
-}
 
 function useAppContext() {
   return React.useContext(AppContext);

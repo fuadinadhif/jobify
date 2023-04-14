@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import BadRequestError from "../errors/bad-request-error.js";
+import attachCookies from "../utils/attach-cookies.js";
 
 const updateUser = async (req, res, next) => {
   try {
@@ -19,10 +20,22 @@ const updateUser = async (req, res, next) => {
 
     const token = user.createJWT();
 
-    res.status(200).json({ user, token, location: user.location });
+    attachCookies({ res, token });
+
+    res.status(200).json({ user, location: user.location });
   } catch (error) {
     next(error);
   }
 };
 
-export { updateUser };
+const getLoggedInUser = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ _id: req.user.userId });
+
+    res.status(200).json({ user, location: user.location });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { updateUser, getLoggedInUser };

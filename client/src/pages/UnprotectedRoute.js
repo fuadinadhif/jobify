@@ -1,25 +1,26 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import { useAppContext } from "../hooks/context/use-app-context";
-
-function GoBack() {
-  const { user } = useAppContext();
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    if (user) {
-      navigate(-1);
-    }
-  }, [navigate, user]);
-
-  return null;
-}
+import Loading from "../components/Loading";
 
 function UnprotectedRoute({ children }) {
-  const { user } = useAppContext();
+  const { user, isUserLoading } = useAppContext();
 
-  return <>{user ? <GoBack /> : children}</>;
+  if (isUserLoading) {
+    return (
+      <Loading
+        center="center"
+        style={{ position: "absolute", top: "45%", right: 0, left: 0 }}
+      />
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
 }
 
 export default UnprotectedRoute;

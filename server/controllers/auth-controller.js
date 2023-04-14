@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import BadRequestError from "../errors/bad-request-error.js";
 import UnauthenticatedError from "../errors/unauthenticated-error.js";
+import attachCookies from "../utils/attach-cookies.js";
 
 const register = async (req, res, next) => {
   try {
@@ -29,9 +30,11 @@ const register = async (req, res, next) => {
     );
     const token = user.createJWT();
 
+    attachCookies({ res, token });
+
     res
       .status(201)
-      .json({ user: userWithoutPassword, token, location: user.location });
+      .json({ user: userWithoutPassword, location: user.location });
   } catch (error) {
     next(error);
   }
@@ -60,10 +63,25 @@ const login = async (req, res, next) => {
     const token = user.createJWT();
     user.password = undefined;
 
-    res.status(200).json({ user, token, location: user.location });
+    attachCookies({ res, token });
+
+    res.status(200).json({ user, location: user.location });
   } catch (error) {
     next(error);
   }
 };
 
-export { register, login };
+const logout = async (req, res, next) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+    });
+
+    res.status(200).json({ message: "User has been logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, login, logout };
